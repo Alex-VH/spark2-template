@@ -37,7 +37,7 @@ object SessionBuilder {
     val spark: SparkSession = SparkSession.builder
       .appName("spar2-template")
       .master("local[*]")
-      .config("spark.driver.memory", "4G")
+      .config("spark.driver.memory", "16G")
       .config("spark.kryoserializer.buffer.max","200M")
       .config("spark.serializer","org.apache.spark.serializer.KryoSerializer")
       .getOrCreate

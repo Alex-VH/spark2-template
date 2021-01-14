@@ -11,7 +11,7 @@ object examples {
     val toursDF = spark.read
       .option("multiline", true)
       .option("mode", "PERMISSIVE")
-      .json("data/input/tours.json")
+      .json("/home/formation/Documents/BigData/Spark/data/tours.json")
     toursDF.show
 
     println(toursDF
@@ -33,6 +33,60 @@ object examples {
       .orderBy($"tourPrice".desc)
       .show(20)
 
+
+  }
+
+  def exec1bis(): Unit={
+    val spark = SessionBuilder.buildSession()
+    import spark.implicits._
+
+    val demoCommunesDF = spark.read
+      .json("/home/formation/Documents/BigData/Spark/data/demographie_par_commune.json")
+
+//    demoCommunesDF.select(sum($"Population"))
+//      .show()
+
+//    demoCommunesDF.groupBy($"Departement")
+//      .agg(sum($"Population") as "sum_pop" ,$"Departement")
+//      .orderBy($"sum_pop".desc)
+//      .show()
+
+    val nomDepDF = spark.read
+      .csv("/home/formation/Documents/BigData/Spark/data/departements.txt")
+      .withColumnRenamed("_c0","nom")
+      .withColumnRenamed("_c1", "Departement")
+      .show()
+
+    demoCommunesDF.groupBy($"Departement")
+      .agg(sum($"Population") as "sum_pop" ,$"Departement")
+      .orderBy($"sum_pop".desc)
+      .show()
+
+//    demoCommunesDF.join(nomDepDF,"Departement").show()
+  }
+
+
+  def exec3(): Unit={
+    val spark = SessionBuilder.buildSession()
+    import spark.implicits._
+
+    val toursDF = spark.read
+      .option("multiline", true)
+      .option("mode", "PERMISSIVE")
+      .json("/home/formation/Documents/BigData/Spark/data/tours.json")
+
+    toursDF.printSchema()
+
+//    Show the number of unique levels difficulty
+    toursDF.groupBy($"tourDifficulty")
+      .agg(count($"tourDifficulty"))
+      .show()
+
+//    min,maxavg of tour prices
+    toursDF.agg(min($"tourPrice"),max($"tourPrice"),avg($"tourPrice"))
+      .show()
+
+    
 
   }
 }
