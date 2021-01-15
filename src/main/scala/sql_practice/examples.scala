@@ -3,6 +3,8 @@ package sql_practice
 import org.apache.spark.sql.functions._
 import spark_helpers.SessionBuilder
 
+import scala.math.Ordering.Implicits.infixOrderingOps
+
 object examples {
   def exec1(): Unit ={
     val spark = SessionBuilder.buildSession()
@@ -75,18 +77,46 @@ object examples {
       .option("mode", "PERMISSIVE")
       .json("/home/formation/Documents/BigData/Spark/data/tours.json")
 
-    toursDF.printSchema()
+//    toursDF.printSchema()
 
 //    Show the number of unique levels difficulty
     toursDF.groupBy($"tourDifficulty")
       .agg(count($"tourDifficulty"))
       .show()
 
-//    min,maxavg of tour prices
+//    min,max, avg of tour prices
     toursDF.agg(min($"tourPrice"),max($"tourPrice"),avg($"tourPrice"))
       .show()
 
-    
+//    min,max,avg of tour price + min, max, avg duration for each difficulty
+    toursDF.groupBy($"tourDifficulty")
+      .agg(min($"tourPrice"),max($"tourPrice"),avg($"tourPrice"), min($"tourLength"),max($"tourLength"),avg($"tourLength"))
+      .show()
+
+//    top 10 tour tags
+    toursDF.select($"tourName",explode($"tourTags") as "tags")
+      .groupBy($"tags")
+      .count()
+      .sort($"count".desc)
+      .limit(10)
+      .show()
+
+//    Relationship between top 10 tags and difficulty
+    toursDF.select($"tourName",explode($"tourTags") as "tags", $"tourDifficulty")
+      .groupBy($"tags",$"tourDifficulty")
+      .count()
+      .sort($"count".desc)
+      .limit(10)
+      .show()
+
+//    Adding price avg, min, max + sort by avg
+      toursDF.select(explode($"tourTags") as "tags", $"tourDifficulty",$"tourPrice")
+        .groupBy($"tags",$"tourDifficulty")
+        .agg(min("tourPrice"), max("tourPrice"), avg("tourPrice"))
+        .sort($"avg(tourPrice)".desc)
+        .limit(10)
+        .show()
+
 
   }
 }
