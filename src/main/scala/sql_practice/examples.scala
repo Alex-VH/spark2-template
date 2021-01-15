@@ -79,21 +79,26 @@ object examples {
 
 //    toursDF.printSchema()
 
-//    Show the number of unique levels difficulty
+//  1)  Show the number of unique levels difficulty
     toursDF.groupBy($"tourDifficulty")
       .agg(count($"tourDifficulty"))
       .show()
 
-//    min,max, avg of tour prices
+//  2)  min,max, avg of tour prices
     toursDF.agg(min($"tourPrice"),max($"tourPrice"),avg($"tourPrice"))
       .show()
 
-//    min,max,avg of tour price + min, max, avg duration for each difficulty
+//    3)  min,max, avg of tour prices for each level of difficulty
+    toursDF.groupBy($"tourDifficulty")
+      .agg(min($"tourPrice"),max($"tourPrice"),avg($"tourPrice"))
+      .show()
+
+//  4)  min,max,avg of tour price + min, max, avg duration for each difficulty
     toursDF.groupBy($"tourDifficulty")
       .agg(min($"tourPrice"),max($"tourPrice"),avg($"tourPrice"), min($"tourLength"),max($"tourLength"),avg($"tourLength"))
       .show()
 
-//    top 10 tour tags
+//  5)  top 10 tour tags
     toursDF.select($"tourName",explode($"tourTags") as "tags")
       .groupBy($"tags")
       .count()
@@ -101,7 +106,7 @@ object examples {
       .limit(10)
       .show()
 
-//    Relationship between top 10 tags and difficulty
+//  6)  Relationship between top 10 tags and difficulty
     toursDF.select($"tourName",explode($"tourTags") as "tags", $"tourDifficulty")
       .groupBy($"tags",$"tourDifficulty")
       .count()
@@ -109,7 +114,7 @@ object examples {
       .limit(10)
       .show()
 
-//    Adding price avg, min, max + sort by avg
+//    7) Adding price avg, min, max + sort by avg
       toursDF.select(explode($"tourTags") as "tags", $"tourDifficulty",$"tourPrice")
         .groupBy($"tags",$"tourDifficulty")
         .agg(min("tourPrice"), max("tourPrice"), avg("tourPrice"))
